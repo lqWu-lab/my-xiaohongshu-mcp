@@ -7,6 +7,7 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.PlaywrightException;
 import com.microsoft.playwright.options.LoadState;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -27,12 +28,9 @@ public class LoginAction {
     private static final String USER_ELEMENT_SELECTOR = ".main-container .user .link-wrapper .channel";
     private static final String QRCODE_ELEMENT_SELECTOR = ".login-container .qrcode-img";
 
+    @Setter
     private PageWrapper pageWrapper;
     private final CookieManager cookieManager;
-
-    public void setPageWrapper(PageWrapper pageWrapper) {
-        this.pageWrapper = pageWrapper;
-    }
 
     /**
      * 检查登录状态
@@ -103,7 +101,7 @@ public class LoginAction {
             // 使用 LOAD 而不是 NETWORKIDLE，对应 Go 版本的 MustWaitLoad()
             page.waitForLoadState(LoadState.LOAD);
             
-            // 2. 等待2秒让页面完全加载（参考 Go 版本）
+            // 2. 等待2秒让页面完全加载
             log.info("等待页面加载...");
             Thread.sleep(2000);
             
@@ -113,7 +111,7 @@ public class LoginAction {
                 return null;
             }
             
-            // 4. 获取二维码图片（使用 Go 版本相同的选择器）
+            // 4. 获取二维码图片
             log.info("尝试获取二维码图片，选择器: {}", QRCODE_ELEMENT_SELECTOR);
             String src = page.locator(QRCODE_ELEMENT_SELECTOR).getAttribute("src");
             
@@ -137,33 +135,38 @@ public class LoginAction {
 
     /**
      * 等待用户扫码登录
+     *
+     * <p>参考 Go 版本实现，使用 waitForSelector 阻塞等待用户元素出现。
+     * 扫码后页面会重渲染完成，然后用户元素才会出现。
+     *
+     * @param timeoutMillis 超时时间（毫秒）
+     * @return 是否登录成功
      */
     public boolean waitForLogin(long timeoutMillis) {
-        long startTime = System.currentTimeMillis();
-        long interval = 500;
-        Page page = pageWrapper.getPage();
-        
         log.info("Waiting for user to scan QR code... (timeout: {}ms)", timeoutMillis);
-        
-        while (System.currentTimeMillis() - startTime < timeoutMillis) {
-            try {
-                Thread.sleep(interval);
-                
-                Locator el = page.locator(USER_ELEMENT_SELECTOR);
-                if (el.isVisible()) {
-                    log.info("User logged in successfully");
-                    return true;
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                log.warn("Login wait interrupted");
-                return false;
-            } catch (PlaywrightException e) {
-                // 元素未找到，继续等待
-            }
+
+        try {
+            // 获取 page 引用
+            Page page = pageWrapper.getPage();
+
+            // 使用 waitForSelector 等待元素出现（会阻塞）
+            // 这比轮询更可靠，因为它会在元素出现时立即返回
+            page.waitForSelector(USER_ELEMENT_SELECTOR,
+                new Page.WaitForSelectorOptions()
+                    .setTimeout((double) timeoutMillis)
+                    .setState(com.microsoft.playwright.options.WaitForSelectorState.ATTACHED));
+
+            log.info("User logged in successfully");
+            return true;
+
+        } catch (PlaywrightException e) {
+            // 超时或其他 Playwright 异常
+            log.warn("Login wait failed: {}", e.getMessage());
+            return false;
+        } catch (Exception e) {
+            log.warn("Login wait interrupted: {}", e.getMessage());
+            return false;
         }
-        
-        return false;
     }
 
     /**
