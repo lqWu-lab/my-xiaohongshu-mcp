@@ -1,0 +1,33 @@
+my-xiaohongshu-mcp/
+├── src/main/java/com/lquw/mcp/server/xiaohongshu
+│   ├── XiaohongshuMcpApplication.java       # 启动类
+│   ├── config/                                # 配置类
+│   │   ├── BrowserConfig.java
+│   │   └── McpConfig.java
+│   ├── controller/                            # Controller层
+│   │   ├── McpController.java                # MCP HTTP端点
+│   │   └── ApiController.java                # REST API
+│   ├── service/                               # 服务层
+│   │   ├── XiaohongshuService.java
+│   │   └── BrowserService.java
+│   ├── model/                                 # 数据模型
+│   │   ├── request/
+│   │   ├── response/
+│   │   └── mcp/
+│   ├── xiaohongshu/                           # 小红书操作模块
+│   │   ├── PublishAction.java
+│   │   ├── SearchAction.java
+│   │   ├── LoginAction.java
+│   │   └── ...
+│   ├── browser/                               # 浏览器封装
+│   │   ├── BrowserManager.java
+│   │   └── PageWrapper.java
+│   ├── util/                                  # 工具类
+│   │   ├── ImageDownloader.java
+│   │   ├── CookieManager.java
+│   │   └── ...
+│   └── mcp/                                   # MCP协议实现
+│       ├── McpServer.java
+│       ├── McpTool.java
+│       └── McpHandler.java
+└── pom.xml
