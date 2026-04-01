@@ -1,13 +1,12 @@
 package com.lqwu.mcp.server.xiaohongshu;
 
-import ch.qos.logback.core.testUtil.RandomUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lqwu.mcp.server.xiaohongshu.browser.BrowserManager;
 import com.lqwu.mcp.server.xiaohongshu.browser.PageWrapper;
 import com.lqwu.mcp.server.xiaohongshu.config.BrowserConfig;
 import com.lqwu.mcp.server.xiaohongshu.util.CookieManager;
 import com.lqwu.mcp.server.xiaohongshu.xhs.LoginAction;
-import com.lqwu.mcp.server.xiaohongshu.xhs.PublishAction;
+import com.lqwu.mcp.server.xiaohongshu.xhs.PublishImageAction;
 import com.lqwu.mcp.server.xiaohongshu.xhs.req.XhsPublishReq;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,23 +14,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * 小红书发布功能测试类
  *
- * <p>该测试类用于测试 PublishAction 的各项功能。
+ * <p>该测试类用于测试 PublishImageAction 的各项功能。
  * 注意：发布功能需要先登录成功才能测试。
  */
-public class PublishActionTest {
+public class PublishImageActionTest {
 
     private BrowserManager browserManager;
     private CookieManager cookieManager;
     private PageWrapper pageWrapper;
-    private PublishAction publishAction;
+    private PublishImageAction publishImageAction;
     private LoginAction loginAction;
     private BrowserConfig browserConfig;
     private ObjectMapper objectMapper;
@@ -61,8 +56,8 @@ public class PublishActionTest {
         loginAction.setPageWrapper(pageWrapper);
 
         // 6. 创建发布操作类
-        publishAction = new PublishAction();
-        publishAction.setPageWrapper(pageWrapper);
+        publishImageAction = new PublishImageAction();
+        publishImageAction.setPageWrapper(pageWrapper);
 
         System.out.println("===== 测试环境准备完成 =====");
     }
@@ -92,7 +87,7 @@ public class PublishActionTest {
             XhsPublishReq req = createBasicPublishReq();
 
             // 执行发布
-            publishAction.publish(req);
+            publishImageAction.publish(req);
 
             System.out.println("发布流程执行完成");
             System.out.println("===== 测试完成 =====\n");
@@ -119,7 +114,7 @@ public class PublishActionTest {
                     System.getProperty("user.dir") + "/src/main/resources/image/2.png"
             ));
 
-            publishAction.publish(req);
+            publishImageAction.publish(req);
 
             System.out.println("多图上传测试完成");
             System.out.println("===== 测试完成 =====\n");
@@ -148,7 +143,7 @@ public class PublishActionTest {
                 "#流行音乐"
             ));
 
-            publishAction.publish(req);
+            publishImageAction.publish(req);
 
             System.out.println("带标签发布测试完成");
             System.out.println("===== 测试完成 =====\n");
@@ -169,9 +164,9 @@ public class PublishActionTest {
 
         try {
             XhsPublishReq req = createBasicPublishReq();
-            req.setOriginal(true); // 开启原创声明
+            req.setIsOriginal(true); // 开启原创声明
 
-            publishAction.publish(req);
+            publishImageAction.publish(req);
 
             System.out.println("原创声明测试完成");
             System.out.println("===== 测试完成 =====\n");
@@ -194,13 +189,13 @@ public class PublishActionTest {
             // 测试仅自己可见
             XhsPublishReq req1 = createBasicPublishReq();
             req1.setVisibility("仅自己可见");
-            publishAction.publish(req1);
+            publishImageAction.publish(req1);
             System.out.println("仅自己可见测试完成");
 
             // 测试互关好友可见
             XhsPublishReq req2 = createBasicPublishReq();
             req2.setVisibility("仅互关好友可见");
-            publishAction.publish(req2);
+            publishImageAction.publish(req2);
             System.out.println("仅互关好友可见测试完成");
 
             System.out.println("===== 测试完成 =====\n");
@@ -224,7 +219,7 @@ public class PublishActionTest {
             // 设置为1小时后的定时发布
             req.setScheduleTime(java.time.LocalDateTime.now().plusHours(1));
 
-            publishAction.publish(req);
+            publishImageAction.publish(req);
 
             System.out.println("定时发布测试完成");
             System.out.println("===== 测试完成 =====\n");
@@ -248,7 +243,7 @@ public class PublishActionTest {
             // 设置商品
             req.setProducts(Arrays.asList("商品关键词1", "商品关键词2"));
 
-            publishAction.publish(req);
+            publishImageAction.publish(req);
 
             System.out.println("商品绑定测试完成");
             System.out.println("===== 测试完成 =====\n");
@@ -267,7 +262,7 @@ public class PublishActionTest {
         req.setTitle("测试标题");
         req.setContent("这是测试内容，用于验证发布功能是否正常工作。");
         req.setImagePaths(Arrays.asList(System.getProperty("user.dir") + "/src/main/resources/image/1.png"));
-        req.setOriginal(false);
+        req.setIsOriginal(false);
         return req;
     }
 }

@@ -27,7 +27,7 @@ public class XhsPublishReq {
     private List<String> tags;
 
     /**
-     * 图片url列表
+     * url 列表（可以是图片的，也可以是视频的）
      */
     private List<String> imagePaths;
 
@@ -39,7 +39,7 @@ public class XhsPublishReq {
     /**
      * 是否原创
      */
-    private boolean isOriginal;
+    private Boolean isOriginal;
 
     /**
      * 访问权限
