@@ -37,3 +37,6 @@ build/
 
 ### Mac OS ###
 .DS_Store
+/src/main/resources/image/
+/src/main/resources/static/
+/src/main/resources/video/
