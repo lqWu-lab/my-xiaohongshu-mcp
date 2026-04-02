@@ -133,12 +133,12 @@ public class XhsLoginService {
 
     /**
      * 获取登录二维码
+     * 返回二维码后会在后台等待扫码，扫码成功后自动保存Cookie
      */
     @Tool(name = "getLoginQRCode", description = "获取小红书登录的二维码，扫码登录后会自动保存Cookie")
     public String getLoginQRCode() {
         log.info("获取小红书登录二维码...");
         try {
-            // 创建浏览器会话
             PageWrapper pageWrapper = ensureBrowserSession();
             if (pageWrapper == null) {
                 return createErrorResponse("无法创建浏览器会话");
@@ -148,7 +148,6 @@ public class XhsLoginService {
             String qrcodeImage = loginAction.fetchQrcodeImage();
 
             if (qrcodeImage == null) {
-                // 可能已登录
                 boolean isLoggedIn = loginAction.checkLoginStatus();
                 if (isLoggedIn) {
                     return createSuccessResponse("✅ 已经登录，无需扫码", Map.of("alreadyLoggedIn", true));
@@ -156,10 +155,27 @@ public class XhsLoginService {
                 return createErrorResponse("获取二维码失败，请重试");
             }
 
-            log.info("二维码已生成，请使用手机扫码登录");
-            return createSuccessResponse("二维码已生成，请使用手机扫码登录", Map.of(
+            log.info("二维码已生成，启动后台扫码等待...");
+
+            new Thread(() -> {
+                try {
+                    log.info("等待用户扫码登录...");
+                    boolean loginSuccess = loginAction.waitForLogin(300000);
+                    if (loginSuccess) {
+                        log.info("扫码成功，保存Cookie...");
+                        loginAction.saveCookies();
+                        log.info("✅ Cookie已保存");
+                    } else {
+                        log.warn("扫码登录超时");
+                    }
+                } catch (Exception e) {
+                    log.error("等待扫码登录异常: {}", e.getMessage());
+                }
+            }).start();
+
+            return createSuccessResponse("二维码已生成，请在手机上扫码登录（5分钟内有效）", Map.of(
                     "qrcodeImage", qrcodeImage,
-                    "tip", "扫码登录成功后会自动保存Cookie"
+                    "tip", "扫码成功后会显示提示，届时可再次调用 checkLoginStatus 验证"
             ));
         } catch (Exception e) {
             log.error("❌ 获取登录二维码时发生错误:{}", e.getMessage(), e);
@@ -189,7 +205,7 @@ public class XhsLoginService {
     private PageWrapper ensureBrowserSession() {
         try {
             BrowserConfig browserConfig = new BrowserConfig();
-            browserConfig.setHeadless(true); // MCP服务使用无头模式
+            browserConfig.setHeadless(false); // MCP服务使用无头模式
             browserConfig.setBinPath(null);
 
             return browserManager.newBrowser(browserConfig);

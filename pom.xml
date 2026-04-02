@@ -123,7 +123,17 @@
     </repositories>
 
     <build>
-        <finalName>mcp-server-template-app</finalName>
+        <finalName>my-xiaohongshu-mcp</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>image/**</exclude>
+                    <exclude>static/**</exclude>
+                    <exclude>video/**</exclude>
+                </excludes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -93,4 +93,13 @@ public class XhsLoginServiceTest {
         assertNotNull(response);
         assertTrue(response.contains("\"success\""));
     }
+
+    @Test
+    @DisplayName("测试 getLoginQRCode")
+    public void testGetLoginQRCode() {
+        String response = xhsLoginService.getLoginQRCode();
+        System.out.println("响应：" + response);
+        assertNotNull(response);
+        assertTrue(response.contains("\"success\""));
+    }
 }

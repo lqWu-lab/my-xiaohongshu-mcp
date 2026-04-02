@@ -1,35 +1,24 @@
 spring:
   application:
     name: xiaohongshu-mcp-server
+  main:
+    web-application-type: none
 
   ai:
     mcp:
       server:
         enabled: true
-        transport: sse  # 启用 SSE 传输
+        stdio: true
         name: ${spring.application.name}
         version: 1.0.0
 
 # 小红书 API 配置
 xhs:
   api:
-    # 小红书用户的 Cookie 认证信息
-    # 建议通过环境变量 XHS_API_COOKIE 设置，避免硬编码在配置文件中
     cookie: ${XHS_API_COOKIE:}
 
-# 服务器配置
-server:
-  port: 8101
-  servlet:
-    encoding:
-      charset: UTF-8
-      force: true
-      enabled: true
-
-# 日志配置
 logging:
-  # stdio 模式打开，sse 模式，注释掉。
-  #  pattern:
-  #    console:
-  file:
-    name: data/log/${spring.application.name}.log
+  pattern:
+    console:
+  level:
+    root: WARN
