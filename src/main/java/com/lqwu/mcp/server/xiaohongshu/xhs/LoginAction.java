@@ -41,8 +41,14 @@ public class LoginAction {
         page.waitForLoadState(LoadState.LOAD);
         
         try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        
+        try {
             Locator userElement = page.locator(USER_ELEMENT_SELECTOR);
-            return userElement.isVisible();
+            return userElement.count() > 0;
         } catch (Exception e) {
             log.debug("User element not found, not logged in");
             return false;
@@ -56,7 +62,7 @@ public class LoginAction {
         Page page = pageWrapper.getPage();
         try {
             Locator userElement = page.locator(USER_ELEMENT_SELECTOR);
-            return userElement.isVisible();
+            return userElement.count() > 0;
         } catch (Exception e) {
             return false;
         }
@@ -135,10 +141,7 @@ public class LoginAction {
 
     /**
      * 等待用户扫码登录
-     *
-     * <p>参考 Go 版本实现，使用 waitForSelector 阻塞等待用户元素出现。
      * 扫码后页面会重渲染完成，然后用户元素才会出现。
-     *
      * @param timeoutMillis 超时时间（毫秒）
      * @return 是否登录成功
      */

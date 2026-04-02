@@ -41,6 +41,7 @@
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-mcp-server-spring-boot-starter</artifactId>
+<!--            <version>1.0.0-M8</version>-->
         </dependency>
 
         <!-- Playwright (浏览器自动化) -->
@@ -94,6 +95,7 @@
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-mcp-server-webflux-spring-boot-starter</artifactId>
+<!--            <version>${spring-ai.version}</version>-->
         </dependency>
     </dependencies>
 
@@ -108,6 +110,17 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <repositories>
+        <repository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <build>
         <finalName>mcp-server-template-app</finalName>
@@ -129,7 +142,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>3.4.3</version>
                 <configuration>
-                    <mainClass>cn.bugstack.mcp.server.template.McpServerApplication</mainClass>
+                    <mainClass>com.lqwu.mcp.server.xiaohongshu.XiaohongshuMcpApplication</mainClass>
                     <layout>JAR</layout>
                 </configuration>
             </plugin>

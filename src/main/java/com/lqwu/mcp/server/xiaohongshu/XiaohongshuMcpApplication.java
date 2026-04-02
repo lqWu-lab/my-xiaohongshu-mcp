@@ -9,5 +9,4 @@ public class XiaohongshuMcpApplication {
     public static void main(String[] args) {
         SpringApplication.run(XiaohongshuMcpApplication.class, args);
     }
-
 }

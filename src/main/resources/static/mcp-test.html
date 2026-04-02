@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小红书 MCP 测试工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #ff2442;
+            margin-bottom: 30px;
+        }
+        .server-config {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .server-config input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        .tool-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .tool-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .tool-card p {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+        .param-group {
+            margin-bottom: 10px;
+        }
+        .param-group label {
+            display: block;
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 4px;
+        }
+        .param-group input, .param-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        .param-group textarea {
+            min-height: 60px;
+            resize: vertical;
+        }
+        button {
+            background: #ff2442;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #e0203c;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f8f8;
+            border-radius: 4px;
+            font-size: 12px;
+            max-height: 200px;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .result.success {
+            background: #e8f5e9;
+            border-left: 3px solid #4caf50;
+        }
+        .result.error {
+            background: #ffebee;
+            border-left: 3px solid #f44336;
+        }
+        .status {
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .status.connected {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .status.disconnected {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .hint {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 小红书 MCP 测试工具</h1>
+        
+        <div class="hint">
+            💡 提示：如果显示"无法连接"，请确保服务已启动 (java -jar target/mcp-server-template-app.jar)，然后直接点击"执行"按钮测试
+        </div>
+        
+        <div class="server-config">
+            <label>MCP 服务器地址：</label>
+            <input type="text" id="serverUrl" value="http://localhost:8080" placeholder="http://localhost:8080">
+        </div>
+
+        <div id="connectionStatus" class="status disconnected">未连接</div>
+
+        <div class="tools-grid">
+            <!-- 登录相关工具 -->
+            <div class="tool-card">
+                <h3>🔐 checkLoginStatus</h3>
+                <p>检查小红书登录状态</p>
+                <button onclick="callApi('/api/mcp/login/status', 'GET', null, 'checkLoginStatus')">执行</button>
+                <div id="result-checkLoginStatus" class="result"></div>
+            </div>
+
+            <div class="tool-card">
+                <h3>📝 generateCookieFromConfig</h3>
+                <p>从配置生成 Cookie 文件</p>
+                <button onclick="callApi('/api/mcp/login/generate-cookie', 'POST', null, 'generateCookieFromConfig')">执行</button>
+                <div id="result-generateCookieFromConfig" class="result"></div>
+            </div>
+
+            <div class="tool-card">
+                <h3>📱 getLoginQRCode</h3>
+                <p>获取登录二维码</p>
+                <button onclick="callApi('/api/mcp/login/qrcode', 'GET', null, 'getLoginQRCode')">执行</button>
+                <div id="result-getLoginQRCode" class="result"></div>
+            </div>
+
+            <div class="tool-card">
+                <h3>🚪 loginOut</h3>
+                <p>退出登录</p>
+                <button onclick="callApi('/api/mcp/login/logout', 'POST', null, 'loginOut')">执行</button>
+                <div id="result-loginOut" class="result"></div>
+            </div>
+
+            <!-- 搜索工具 -->
+            <div class="tool-card">
+                <h3>🔍 searchXhsNotes</h3>
+                <p>搜索小红书笔记</p>
+                <div class="param-group">
+                    <label>关键词</label>
+                    <input type="text" id="search-keyword" placeholder="美食" value="美食">
+                </div>
+                <div class="param-group">
+                    <label>排序</label>
+                    <input type="text" id="search-sortBy" placeholder="综合" value="综合">
+                </div>
+                <button onclick="callSearch()">执行</button>
+                <div id="result-searchXhsNotes" class="result"></div>
+            </div>
+
+            <!-- 发布图文 -->
+            <div class="tool-card">
+                <h3>🖼️ publishImageNote</h3>
+                <p>发布图文笔记</p>
+                <div class="param-group">
+                    <label>标题</label>
+                    <input type="text" id="image-title" placeholder="测试标题">
+                </div>
+                <div class="param-group">
+                    <label>内容</label>
+                    <textarea id="image-content" placeholder="测试内容"></textarea>
+                </div>
+                <div class="param-group">
+                    <label>图片路径（逗号分隔）</label>
+                    <input type="text" id="image-paths" placeholder="C:/Users/xxx/Pictures/test.jpg">
+                </div>
+                <div class="param-group">
+                    <label>标签（逗号分隔）</label>
+                    <input type="text" id="image-tags" placeholder="#测试,#美食">
+                </div>
+                <button onclick="callPublishImage()">执行</button>
+                <div id="result-publishImageNote" class="result"></div>
+            </div>
+
+            <!-- 发布视频 -->
+            <div class="tool-card">
+                <h3>🎥 publishVideoNote</h3>
+                <p>发布视频笔记</p>
+                <div class="param-group">
+                    <label>标题</label>
+                    <input type="text" id="video-title" placeholder="测试标题">
+                </div>
+                <div class="param-group">
+                    <label>内容</label>
+                    <textarea id="video-content" placeholder="测试内容"></textarea>
+                </div>
+                <div class="param-group">
+                    <label>视频路径</label>
+                    <input type="text" id="video-path" placeholder="C:/Users/xxx/Videos/test.mp4">
+                </div>
+                <div class="param-group">
+                    <label>标签（逗号分隔）</label>
+                    <input type="text" id="video-tags" placeholder="#视频,#Vlog">
+                </div>
+                <button onclick="callPublishVideo()">执行</button>
+                <div id="result-publishVideoNote" class="result"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 获取服务器地址
+        function getServerUrl() {
+            return document.getElementById('serverUrl').value || 'http://localhost:8080';
+        }
+
+        // 检查连接状态
+        async function checkConnection() {
+            const serverUrl = getServerUrl();
+            const statusEl = document.getElementById('connectionStatus');
+            
+            try {
+                // 尝试调用一个简单接口检查连接
+                const response = await fetch(`${serverUrl}/api/mcp/login/status`, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                if (response.ok) {
+                    statusEl.textContent = '✅ 已连接到 MCP 服务器';
+                    statusEl.className = 'status connected';
+                } else {
+                    throw new Error('Connection failed');
+                }
+            } catch (e) {
+                statusEl.textContent = '❌ 无法连接到 MCP 服务器，请确保服务已启动 (端口: 8080)';
+                statusEl.className = 'status disconnected';
+            }
+        }
+
+        // 通用 API 调用函数
+        async function callApi(endpoint, method, body = null, resultId = null) {
+            const serverUrl = getServerUrl();
+            const resultEl = document.getElementById(`result-${resultId}`);
+            
+            if (!resultEl) {
+                console.error(`找不到结果元素: result-${resultId}`);
+                alert(`错误: 找不到结果展示区域`);
+                return;
+            }
+            
+            resultEl.textContent = '执行中...';
+            resultEl.className = 'result';
+            
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                };
+                
+                if (body && (method === 'POST' || method === 'PUT')) {
+                    options.body = JSON.stringify(body);
+                }
+                
+                const response = await fetch(`${serverUrl}${endpoint}`, options);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.text();
+                displayResult(resultEl, result);
+                
+                // 更新连接状态为已连接
+                document.getElementById('connectionStatus').textContent = '✅ 已连接到 MCP 服务器';
+                document.getElementById('connectionStatus').className = 'status connected';
+            } catch (error) {
+                resultEl.textContent = `错误: ${error.message}\n\n请确保:\n1. 服务已启动 (java -jar target/mcp-server-template-app.jar)\n2. 端口 8080 未被占用\n3. 如果是跨域问题，请直接在浏览器地址栏输入 http://localhost:8080/mcp-test.html 访问`;
+                resultEl.className = 'result error';
+            }
+        }
+
+        function displayResult(element, result) {
+            try {
+                // 尝试格式化 JSON
+                const parsed = JSON.parse(result);
+                element.textContent = JSON.stringify(parsed, null, 2);
+            } catch (e) {
+                element.textContent = result;
+            }
+            element.className = 'result success';
+        }
+
+        // 搜索工具调用
+        function callSearch() {
+            const keyword = document.getElementById('search-keyword').value || '美食';
+            const sortBy = document.getElementById('search-sortBy').value || '综合';
+            
+            const params = new URLSearchParams({
+                keyword: keyword,
+                sortBy: sortBy,
+                noteType: '不限',
+                publishTime: '不限',
+                searchScope: '不限',
+                location: '不限'
+            });
+            
+            callApi(`/api/mcp/search?${params}`, 'GET', null, 'searchXhsNotes');
+        }
+
+        // 发布图文工具调用
+        function callPublishImage() {
+            const title = document.getElementById('image-title').value;
+            const content = document.getElementById('image-content').value;
+            const pathsStr = document.getElementById('image-paths').value;
+            const tagsStr = document.getElementById('image-tags').value;
+            
+            if (!title || !content || !pathsStr) {
+                alert('请填写标题、内容和图片路径');
+                return;
+            }
+            
+            const paths = pathsStr.split(',').map(p => p.trim());
+            const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()) : [];
+            
+            const body = {
+                title: title,
+                content: content,
+                imagePaths: paths,
+                tags: tags,
+                scheduleTime: null,
+                isOriginal: false,
+                visibility: '公开可见',
+                products: null
+            };
+            
+            callApi('/api/mcp/publish/image', 'POST', body, 'publishImageNote');
+        }
+
+        // 发布视频工具调用
+        function callPublishVideo() {
+            const title = document.getElementById('video-title').value;
+            const content = document.getElementById('video-content').value;
+            const path = document.getElementById('video-path').value;
+            const tagsStr = document.getElementById('video-tags').value;
+            
+            if (!title || !content || !path) {
+                alert('请填写标题、内容和视频路径');
+                return;
+            }
+            
+            const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()) : [];
+            
+            const body = {
+                title: title,
+                content: content,
+                videoPath: path,
+                tags: tags,
+                scheduleTime: null,
+                visibility: '公开可见',
+                products: null
+            };
+            
+            callApi('/api/mcp/publish/video', 'POST', body, 'publishVideoNote');
+        }
+
+        // 页面加载时检查连接
+        window.onload = checkConnection;
+        
+        // 每 10 秒检查一次连接
+        setInterval(checkConnection, 10000);
+    </script>
+</body>
+</html>
